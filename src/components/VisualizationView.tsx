@@ -3,7 +3,15 @@ import { ControlsBar } from './ControlsBar';
 import { DetailsPanel } from './DetailsPanel';
 import { Heatmap } from './Heatmap';
 import { HelpBox } from './HelpBox';
-import type { AggregateHeatmapCell, ModelOrderMode, ModelRoiColumn, Roi, SelectedHeatmapCell, WideCsvRow } from '../types/data';
+import type {
+  AggregateHeatmapCell,
+  ModelRoiColumn,
+  RankingSystem,
+  Roi,
+  SelectedHeatmapCell,
+  SortDirection,
+  WideCsvRow,
+} from '../types/data';
 
 type VisualizationViewProps = {
   rows: WideCsvRow[];
@@ -11,16 +19,18 @@ type VisualizationViewProps = {
   heatmapRois: Roi[];
   heatmapCells: AggregateHeatmapCell[];
   visibleModels: string[];
-  modelOrder: ModelOrderMode;
-  selectedSortRoi: Roi;
+  rankingSystem: RankingSystem;
+  selectedRankingRoi: Roi;
+  sortDirection: SortDirection;
   modelSearch: string;
   showScoreLabels: boolean;
   selectedCell: SelectedHeatmapCell | null;
   compareMode: boolean;
   compareCells: SelectedHeatmapCell[];
   comparableCellIds: Set<string>;
-  onModelOrderChange: (modelOrder: ModelOrderMode) => void;
-  onSelectedSortRoiChange: (roi: Roi) => void;
+  onRankingSystemChange: (rankingSystem: RankingSystem) => void;
+  onSelectedRankingRoiChange: (roi: Roi) => void;
+  onSortDirectionToggle: () => void;
   onModelSearchChange: (searchTerm: string) => void;
   onShowScoreLabelsChange: (showScoreLabels: boolean) => void;
   onResetControls: () => void;
@@ -34,16 +44,18 @@ export function VisualizationView({
   heatmapRois,
   heatmapCells,
   visibleModels,
-  modelOrder,
-  selectedSortRoi,
+  rankingSystem,
+  selectedRankingRoi,
+  sortDirection,
   modelSearch,
   showScoreLabels,
   selectedCell,
   compareMode,
   compareCells,
   comparableCellIds,
-  onModelOrderChange,
-  onSelectedSortRoiChange,
+  onRankingSystemChange,
+  onSelectedRankingRoiChange,
+  onSortDirectionToggle,
   onModelSearchChange,
   onShowScoreLabelsChange,
   onResetControls,
@@ -55,14 +67,17 @@ export function VisualizationView({
       <HelpBox />
       <ControlsBar
         rois={heatmapRois}
-        modelOrder={modelOrder}
-        selectedSortRoi={selectedSortRoi}
+        rankingSystem={rankingSystem}
+        selectedRankingRoi={selectedRankingRoi}
         modelSearch={modelSearch}
         showScoreLabels={showScoreLabels}
-        onModelOrderChange={onModelOrderChange}
-        onSelectedSortRoiChange={onSelectedSortRoiChange}
+        compareMode={compareMode}
+        compareSelectionCount={compareCells.length}
+        onRankingSystemChange={onRankingSystemChange}
+        onSelectedRankingRoiChange={onSelectedRankingRoiChange}
         onModelSearchChange={onModelSearchChange}
         onShowScoreLabelsChange={onShowScoreLabelsChange}
+        onCompareModeChange={onCompareModeChange}
         onResetControls={onResetControls}
       />
       <div className="workspace-grid">
@@ -71,20 +86,26 @@ export function VisualizationView({
           models={visibleModels}
           rois={heatmapRois}
           showScoreLabels={showScoreLabels}
+          sortDirection={sortDirection}
           selectedCell={selectedCell}
           compareMode={compareMode}
           compareCells={compareCells}
           comparableCellIds={comparableCellIds}
+          onSortDirectionToggle={onSortDirectionToggle}
           onSelectCell={onSelectCell}
+          selectedRankingRoi={rankingSystem === 'roi' ? selectedRankingRoi : null}
         />
         <DetailsPanel
+          heatmapCells={heatmapCells}
           imageCount={rows.length}
           modelRoiColumns={modelRoiColumns}
+          onSelectCell={onSelectCell}
           rows={rows}
           selectedCell={selectedCell}
         />
       </div>
       <CompareDrawer
+        heatmapCells={heatmapCells}
         compareMode={compareMode}
         compareCells={compareCells}
         rows={rows}

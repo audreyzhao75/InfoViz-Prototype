@@ -1,3 +1,14 @@
+.roi-corner-dot {
+  fill: #ffd36a;
+  stroke: #e6b800;
+  stroke-width: 2px;
+  opacity: 0.85;
+}
+.roi-column-highlight {
+  stroke: #ffd36a;
+  stroke-width: 2px;
+  shape-rendering: crispEdges;
+}
 :root {
   color: #17201b;
   background: #f4f6f5;
@@ -275,7 +286,13 @@ dd {
   top: 10px;
   z-index: 10;
   display: grid;
-  grid-template-columns: minmax(220px, 1.4fr) repeat(2, minmax(180px, 1fr)) minmax(220px, 1fr) auto;
+  grid-template-columns:
+    minmax(220px, 1.4fr)
+    repeat(2, minmax(180px, 1fr))
+    minmax(220px, 1fr)
+    minmax(160px, 0.9fr)
+    minmax(180px, 1fr)
+    auto;
   gap: 12px;
   margin: 20px 0 24px;
   border: 1px solid rgba(179, 193, 185, 0.8);
@@ -337,6 +354,26 @@ dd {
 
 .toggle-control:hover {
   border-color: var(--accent);
+}
+
+.compare-status {
+  display: grid;
+  align-items: center;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  background: var(--surface-muted);
+  color: #5a6d64;
+  font-size: 0.78rem;
+  font-weight: 760;
+  min-height: 42px;
+}
+
+.compare-status.active {
+  border-style: solid;
+  border-color: rgba(178, 58, 72, 0.35);
+  background: rgba(178, 58, 72, 0.08);
+  color: #7c2131;
 }
 
 .reset-controls-button,
@@ -528,6 +565,31 @@ dd {
   fill: var(--accent-soft);
   opacity: 0.56;
   pointer-events: none;
+}
+
+.heatmap-corner-sort {
+  cursor: pointer;
+}
+
+.heatmap-corner-sort rect {
+  fill: var(--surface);
+  stroke: var(--border-strong);
+  stroke-width: 1.25;
+}
+
+.heatmap-corner-sort line,
+.heatmap-corner-sort polyline {
+  fill: none;
+  stroke: #21483f;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.1;
+}
+
+.heatmap-corner-sort:hover rect,
+.heatmap-corner-sort:focus-visible rect {
+  stroke: var(--accent);
+  stroke-width: 1.8;
 }
 
 .cell-score-label {
@@ -724,6 +786,132 @@ dd {
   margin-bottom: 0;
 }
 
+.insights-panel {
+  display: grid;
+  gap: 16px;
+  border-top: 1px solid #e3ebe6;
+  padding-top: 16px;
+}
+
+.insight-panel-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.insight-summary {
+  margin: 0;
+  color: #42554b;
+}
+
+.insight-metric-grid,
+.roi-pair-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.insight-metric-grid div,
+.roi-pair-metrics div {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  background: var(--surface-muted);
+}
+
+.insight-metric-grid dd,
+.roi-pair-metrics dd {
+  overflow-wrap: anywhere;
+  font-size: 0.96rem;
+}
+
+.insight-section {
+  display: grid;
+  gap: 12px;
+}
+
+.insight-section-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.insight-section-heading p {
+  margin: 6px 0 0;
+}
+
+.insight-section-heading span {
+  flex: 0 0 auto;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: var(--surface);
+  color: #4e6258;
+  font-size: 0.76rem;
+  font-weight: 760;
+}
+
+.discovery-list,
+.compare-neighbor-list {
+  display: grid;
+  gap: 10px;
+}
+
+.discovery-card,
+.compare-neighbor-card {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 13px;
+  background: var(--surface-muted);
+  color: var(--text);
+  text-align: left;
+}
+
+.discovery-card:hover,
+.compare-neighbor-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: 0 8px 20px rgba(19, 29, 24, 0.07);
+}
+
+.discovery-card-header,
+.compare-neighbor-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.discovery-card p {
+  margin: 0;
+  color: #4d6157;
+  font-size: 0.82rem;
+}
+
+.discovery-badge-row,
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.discovery-badge-row span,
+.tag-row span {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: var(--surface);
+  color: #4e6258;
+  font-size: 0.76rem;
+  font-weight: 760;
+}
+
 .evidence-grid-section {
   display: grid;
   gap: 12px;
@@ -902,7 +1090,6 @@ dd {
 
 .compare-drawer {
   display: grid;
-  margin-top: 24px;
   padding: 22px;
   align-items: stretch;
 }
@@ -943,6 +1130,39 @@ dd {
   margin: 0;
 }
 
+.compare-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 18;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(17, 23, 20, 0.5);
+  backdrop-filter: blur(3px);
+}
+
+.compare-modal {
+  width: min(1180px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  margin-top: 0;
+  box-shadow: var(--shadow-lg);
+}
+
+.compare-close-button {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 10px 13px;
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 800;
+}
+
+.compare-close-button:hover {
+  border-color: var(--accent);
+  box-shadow: 0 5px 14px rgba(19, 29, 24, 0.11);
+}
+
 .compare-drawer-body {
   display: grid;
   gap: 16px;
@@ -959,10 +1179,22 @@ dd {
   font-weight: 760;
 }
 
+
 .compare-card-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
+  max-height: 480px;
+  overflow-y: auto;
+}
+
+.compare-cell-card {
+  display: grid;
+  gap: 13px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  background: var(--surface-muted);
 }
 
 .compare-cell-card,
@@ -1048,6 +1280,16 @@ dd {
 .compare-overlap-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.compare-summary-note {
+  margin: 0;
+  color: #42554b;
+}
+
+.compare-neighbor-section {
+  display: grid;
   gap: 12px;
 }
 
@@ -1230,6 +1472,7 @@ dd {
 
   .selected-score-strip,
   .summary-card-grid,
+  .insight-metric-grid,
   .evidence-image-grid,
   .compare-metrics {
     grid-template-columns: 1fr;
@@ -1251,6 +1494,10 @@ dd {
   }
 
   .image-modal-backdrop {
+    padding: 12px;
+  }
+
+  .compare-modal-backdrop {
     padding: 12px;
   }
 }

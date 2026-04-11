@@ -1,4 +1,4 @@
-import type { AggregateHeatmapCell, JsonScoreObject, ModelOrderMode, Roi } from '../types/data';
+import type { AggregateHeatmapCell, JsonScoreObject, RankingSystem, Roi, SortDirection } from '../types/data';
 
 export const DEFAULT_HEATMAP_ROIS: Roi[] = ['ffa', 'ppa', 'eba'];
 
@@ -7,7 +7,13 @@ function getScore(scores: JsonScoreObject, roi: Roi, model: string): number | nu
   return typeof value === 'number' && Number.isFinite(value) ? value : null;
 }
 
-function compareScoresDesc(aScore: number | null, bScore: number | null, aModel: string, bModel: string): number {
+function compareScores(
+  aScore: number | null,
+  bScore: number | null,
+  aModel: string,
+  bModel: string,
+  direction: SortDirection,
+): number {
   if (aScore === null && bScore === null) {
     return aModel.localeCompare(bModel);
   }
@@ -20,7 +26,8 @@ function compareScoresDesc(aScore: number | null, bScore: number | null, aModel:
     return -1;
   }
 
-  return bScore - aScore || aModel.localeCompare(bModel);
+  const difference = direction === 'desc' ? bScore - aScore : aScore - bScore;
+  return difference || aModel.localeCompare(bModel);
 }
 
 export function getDefaultHeatmapRois(scores: JsonScoreObject): Roi[] {
@@ -49,18 +56,16 @@ export function inferAggregateModels(scores: JsonScoreObject, rois: Roi[]): stri
 export function orderAggregateModels(
   models: string[],
   scores: JsonScoreObject,
-  orderMode: ModelOrderMode,
+  rankingSystem: RankingSystem,
   selectedRoi: Roi,
+  sortDirection: SortDirection,
 ): string[] {
   const sortedModels = [...models];
+  const scoreRoi = rankingSystem === 'roi' ? selectedRoi : 'Overall';
 
-  if (orderMode === 'alphabetical') {
-    return sortedModels.sort((a, b) => a.localeCompare(b));
-  }
-
-  const scoreRoi = orderMode === 'selected-roi-desc' ? selectedRoi : 'Overall';
-
-  return sortedModels.sort((a, b) => compareScoresDesc(getScore(scores, scoreRoi, a), getScore(scores, scoreRoi, b), a, b));
+  return sortedModels.sort((a, b) =>
+    compareScores(getScore(scores, scoreRoi, a), getScore(scores, scoreRoi, b), a, b, sortDirection),
+  );
 }
 
 export function filterModelsBySearch(models: string[], searchTerm: string): string[] {

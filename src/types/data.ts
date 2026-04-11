@@ -27,7 +27,8 @@ export type VisualizationData = {
   modelRoiColumns: ModelRoiColumn[];
 };
 
-export type ModelOrderMode = 'overall-desc' | 'alphabetical' | 'selected-roi-desc';
+export type RankingSystem = 'overall' | 'roi';
+export type SortDirection = 'desc' | 'asc';
 
 export type AggregateHeatmapCell = {
   id: string;

@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import type { KeyboardEvent, MouseEvent } from 'react';
 import { extent, interpolateViridis, scaleBand, scaleSequential } from 'd3';
-import type { AggregateHeatmapCell, Roi, SelectedHeatmapCell } from '../types/data';
+import type { AggregateHeatmapCell, Roi, SelectedHeatmapCell, SortDirection } from '../types/data';
 import { inferModelCategory } from '../utils/modelTags';
 
 type HeatmapProps = {
@@ -9,11 +9,14 @@ type HeatmapProps = {
   models: string[];
   rois: Roi[];
   showScoreLabels: boolean;
+  sortDirection: SortDirection;
   selectedCell: SelectedHeatmapCell | null;
   compareMode: boolean;
   compareCells: SelectedHeatmapCell[];
   comparableCellIds: Set<string>;
+  onSortDirectionToggle: () => void;
   onSelectCell: (cell: SelectedHeatmapCell) => void;
+  selectedRankingRoi?: Roi | null;
 };
 
 type TooltipState = {
@@ -25,6 +28,7 @@ type TooltipState = {
 const margin = { top: 34, right: 28, bottom: 62, left: 190 };
 const roiColumnWidth = 96;
 const modelRowHeight = 28;
+const sortToggleBoxSize = 34;
 
 function formatScore(score: number | null): string {
   return score === null ? 'NA' : score.toFixed(3);
@@ -61,11 +65,14 @@ export function Heatmap({
   models,
   rois,
   showScoreLabels,
+  sortDirection,
   selectedCell,
   compareMode,
   compareCells,
   comparableCellIds,
+  onSortDirectionToggle,
   onSelectCell,
+  selectedRankingRoi = null,
 }: HeatmapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
@@ -80,10 +87,13 @@ export function Heatmap({
   const heatmapHeight = Math.max(220, models.length * modelRowHeight);
   const height = margin.top + margin.bottom + heatmapHeight;
   const innerWidth = width - margin.left - margin.right;
+  const sortToggleX = margin.left - sortToggleBoxSize - 18;
+  const sortToggleY = margin.top - sortToggleBoxSize + 2;
 
   const x = scaleBand<string>().domain(rois).range([0, innerWidth]).padding(0.12);
   const y = scaleBand<string>().domain(models).range([0, heatmapHeight]).padding(0.08);
-  const canShowScoreLabels = showScoreLabels && x.bandwidth() >= 30 && y.bandwidth() >= 28;
+  const canShowScoreLabels = showScoreLabels && x.bandwidth() >= 44 && y.bandwidth() >= 18;
+  const scoreLabelFontSize = Math.max(8, Math.min(11, Math.min(x.bandwidth() * 0.2, y.bandwidth() * 0.55)));
   const legendValues = [minScore, (minScore + adjustedMaxScore) / 2, adjustedMaxScore];
   const legendSteps = Array.from({ length: 48 }, (_, index) => minScore + ((adjustedMaxScore - minScore) * index) / 47);
 
@@ -122,6 +132,13 @@ export function Heatmap({
     onSelectCell(cell);
   }
 
+  function handleSortToggleKeyDown(event: KeyboardEvent<SVGGElement>) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onSortDirectionToggle();
+    }
+  }
+
   return (
     <section className="heatmap-area" aria-label="Heatmap area" ref={containerRef}>
       <div className="section-heading">
@@ -131,7 +148,21 @@ export function Heatmap({
         </div>
         <span>{cells.length} cells</span>
       </div>
-      <div className="heatmap-scroll" onMouseLeave={() => setTooltip(null)}>
+      <div className="heatmap-scroll" style={{ position: 'relative' }} onMouseLeave={() => setTooltip(null)}>
+        {/* Color scale legend at top-right */}
+        <div style={{ position: 'absolute', top: 54, left: 0, zIndex: 2, padding: '18px 0 0 18px' }}>
+          <svg width="160" height="38" style={{ display: 'block' }} aria-label="Color scale legend">
+            <defs>
+              <linearGradient id="heatmap-legend-gradient" x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0%" stopColor={color(adjustedMaxScore)} />
+                <stop offset="100%" stopColor={color(minScore)} />
+              </linearGradient>
+            </defs>
+            <rect x="0" y="8" width="120" height="16" rx="7" fill="url(#heatmap-legend-gradient)" />
+            <text x="0" y="34" fontSize="11" fill="#42554b" fontWeight="700">Highest</text>
+            <text x="120" y="34" fontSize="11" fill="#42554b" fontWeight="700" textAnchor="end">Lowest</text>
+          </svg>
+        </div>
         {cells.length === 0 ? (
           <div className="heatmap-empty-state">
             <h3>No models match the current search</h3>
@@ -140,7 +171,56 @@ export function Heatmap({
         ) : (
           <svg className="heatmap-svg" viewBox={`0 0 ${width} ${height}`} role="img">
             <title>Model by ROI aggregate score heatmap</title>
+            <g
+              className="heatmap-corner-sort"
+              role="button"
+              tabIndex={0}
+              aria-label={`Ranking direction is ${sortDirection === 'desc' ? 'descending' : 'ascending'}. Activate to switch direction.`}
+              transform={`translate(${sortToggleX},${sortToggleY})`}
+              onClick={onSortDirectionToggle}
+              onKeyDown={handleSortToggleKeyDown}
+            >
+              <rect width={sortToggleBoxSize} height={sortToggleBoxSize} rx={8} />
+              <line
+                x1={sortToggleBoxSize / 2}
+                y1={sortDirection === 'desc' ? 13 : 21}
+                x2={sortToggleBoxSize / 2}
+                y2={sortDirection === 'desc' ? 21 : 13}
+                strokeWidth={2}
+              />
+              <polyline
+                points={
+                  sortDirection === 'desc'
+                    ? `${sortToggleBoxSize / 2 - 4},17 ${sortToggleBoxSize / 2},21 ${sortToggleBoxSize / 2 + 4},17`
+                    : `${sortToggleBoxSize / 2 - 4},17 ${sortToggleBoxSize / 2},13 ${sortToggleBoxSize / 2 + 4},17`
+                }
+                strokeWidth={2}
+              />
+            </g>
             <g transform={`translate(${margin.left},${margin.top})`}>
+
+              {/* Highlight ROI column if ROI ranking is active and a ROI is selected */}
+
+              {selectedRankingRoi && (
+                <g className="roi-column-highlight-group" style={{ pointerEvents: 'none' }}>
+                  {/* Make highlight a bit bigger by offsetting x/y and increasing width/height */}
+                  <rect
+                    className="roi-column-highlight"
+                    x={(x(selectedRankingRoi) ?? 0) - 3}
+                    y={-3}
+                    width={(x.bandwidth() || 0) + 6}
+                    height={heatmapHeight + 6}
+                    fill="#ffe9b3"
+                    fillOpacity={0.55}
+                  />
+                  {/* Four corner dots */}
+                  <circle cx={(x(selectedRankingRoi) ?? 0) - 3} cy={-3} r="6" className="roi-corner-dot" />
+                  <circle cx={(x(selectedRankingRoi) ?? 0) - 3} cy={heatmapHeight + 3} r="6" className="roi-corner-dot" />
+                  <circle cx={(x(selectedRankingRoi) ?? 0) + (x.bandwidth() || 0) + 3} cy={-3} r="6" className="roi-corner-dot" />
+                  <circle cx={(x(selectedRankingRoi) ?? 0) + (x.bandwidth() || 0) + 3} cy={heatmapHeight + 3} r="6" className="roi-corner-dot" />
+                </g>
+              )}
+
               {hoveredCell && (
                 <>
                   <rect className="heatmap-highlight" x={0} y={y(hoveredCell.model) ?? 0} width={innerWidth} height={y.bandwidth()} />
@@ -194,6 +274,7 @@ export function Heatmap({
                         x={xPosition + x.bandwidth() / 2}
                         y={yPosition + y.bandwidth() / 2}
                         fill={scoreTextColor(cell.score, minScore, adjustedMaxScore)}
+                        style={{ fontSize: `${scoreLabelFontSize}px` }}
                       >
                         {cell.score.toFixed(2)}
                       </text>

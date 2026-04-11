@@ -4,7 +4,7 @@ import { TabNav } from './components/TabNav';
 import type { AppTab } from './components/TabNav';
 import { UserStudyView } from './components/UserStudyView';
 import { VisualizationView } from './components/VisualizationView';
-import type { ModelOrderMode, Roi, SelectedHeatmapCell, VisualizationData } from './types/data';
+import type { RankingSystem, Roi, SelectedHeatmapCell, SortDirection, VisualizationData } from './types/data';
 import { loadVisualizationData } from './utils/data';
 import { hasComparableData } from './utils/evidence';
 import {
@@ -22,8 +22,9 @@ type DataState =
 
 export default function App() {
   const [dataState, setDataState] = useState<DataState>({ status: 'loading' });
-  const [modelOrder, setModelOrder] = useState<ModelOrderMode>('overall-desc');
-  const [selectedSortRoi, setSelectedSortRoi] = useState<Roi>('ffa');
+  const [rankingSystem, setRankingSystem] = useState<RankingSystem>('overall');
+  const [selectedRankingRoi, setSelectedRankingRoi] = useState<Roi>('ffa');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [modelSearch, setModelSearch] = useState('');
   const [showScoreLabels, setShowScoreLabels] = useState(false);
   const [selectedCell, setSelectedCell] = useState<SelectedHeatmapCell | null>(null);
@@ -83,8 +84,9 @@ export default function App() {
   }
 
   function handleResetControls() {
-    setModelOrder('overall-desc');
-    setSelectedSortRoi('ffa');
+    setRankingSystem('overall');
+    setSelectedRankingRoi('ffa');
+    setSortDirection('desc');
     setModelSearch('');
     setShowScoreLabels(false);
     setSelectedCell(null);
@@ -119,8 +121,8 @@ export default function App() {
   const { data } = dataState;
   const heatmapRois = getDefaultHeatmapRois(data.scores);
   const aggregateModels = inferAggregateModels(data.scores, heatmapRois);
-  const sortRoi: Roi = heatmapRois.includes(selectedSortRoi) ? selectedSortRoi : (heatmapRois[0] ?? 'ffa');
-  const orderedModels = orderAggregateModels(aggregateModels, data.scores, modelOrder, sortRoi);
+  const rankingRoi: Roi = heatmapRois.includes(selectedRankingRoi) ? selectedRankingRoi : (heatmapRois[0] ?? 'ffa');
+  const orderedModels = orderAggregateModels(aggregateModels, data.scores, rankingSystem, rankingRoi, sortDirection);
   const visibleModels = filterModelsBySearch(orderedModels, modelSearch);
   const heatmapCells = buildAggregateHeatmapCells(data.scores, heatmapRois, visibleModels);
   const comparableCellIds = new Set(
@@ -140,16 +142,18 @@ export default function App() {
           heatmapRois={heatmapRois}
           heatmapCells={heatmapCells}
           visibleModels={visibleModels}
-          modelOrder={modelOrder}
-          selectedSortRoi={sortRoi}
+          rankingSystem={rankingSystem}
+          selectedRankingRoi={rankingRoi}
+          sortDirection={sortDirection}
           modelSearch={modelSearch}
           showScoreLabels={showScoreLabels}
           selectedCell={selectedCell}
           compareMode={compareMode}
           compareCells={compareCells}
           comparableCellIds={comparableCellIds}
-          onModelOrderChange={setModelOrder}
-          onSelectedSortRoiChange={setSelectedSortRoi}
+          onRankingSystemChange={setRankingSystem}
+          onSelectedRankingRoiChange={setSelectedRankingRoi}
+          onSortDirectionToggle={() => setSortDirection((currentDirection) => (currentDirection === 'desc' ? 'asc' : 'desc'))}
           onModelSearchChange={setModelSearch}
           onShowScoreLabelsChange={setShowScoreLabels}
           onResetControls={handleResetControls}

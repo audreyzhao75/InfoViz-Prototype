@@ -1,13 +1,16 @@
 import { useMemo, useState } from 'react';
 import { ImageGrid } from './ImageGrid';
-import type { EvidenceImage, ModelRoiColumn, SelectedHeatmapCell, WideCsvRow } from '../types/data';
+import { SelectionInsights } from './SelectionInsights';
+import type { AggregateHeatmapCell, EvidenceImage, ModelRoiColumn, SelectedHeatmapCell, WideCsvRow } from '../types/data';
 import { copyText, downloadJson } from '../utils/browserActions';
 import { buildEvidenceView } from '../utils/evidence';
 import { inferModelCategory } from '../utils/modelTags';
 
 type DetailsPanelProps = {
+  heatmapCells: AggregateHeatmapCell[];
   imageCount: number;
   modelRoiColumns: ModelRoiColumn[];
+  onSelectCell: (cell: SelectedHeatmapCell) => void;
   rows: WideCsvRow[];
   selectedCell: SelectedHeatmapCell | null;
 };
@@ -47,7 +50,14 @@ function ImageModal({ image, onClose }: { image: EvidenceImage; onClose: () => v
   );
 }
 
-export function DetailsPanel({ imageCount, modelRoiColumns, rows, selectedCell }: DetailsPanelProps) {
+export function DetailsPanel({
+  heatmapCells,
+  imageCount,
+  modelRoiColumns,
+  onSelectCell,
+  rows,
+  selectedCell,
+}: DetailsPanelProps) {
   const [topK, setTopK] = useState(6);
   const [modalImage, setModalImage] = useState<EvidenceImage | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
@@ -199,18 +209,6 @@ export function DetailsPanel({ imageCount, modelRoiColumns, rows, selectedCell }
               <dt>Min image value</dt>
               <dd>{formatValue(evidenceView.stats.min)}</dd>
             </div>
-            <div>
-              <dt>Mean</dt>
-              <dd>{formatValue(evidenceView.stats.mean)}</dd>
-            </div>
-            <div>
-              <dt>Median</dt>
-              <dd>{formatValue(evidenceView.stats.median)}</dd>
-            </div>
-            <div>
-              <dt>Std. dev.</dt>
-              <dd>{formatValue(evidenceView.stats.standardDeviation)}</dd>
-            </div>
           </dl>
 
           <p className="evidence-column-note">
@@ -221,6 +219,8 @@ export function DetailsPanel({ imageCount, modelRoiColumns, rows, selectedCell }
           <ImageGrid title="Bottom images" images={evidenceView.bottomImages} onOpenImage={setModalImage} />
         </>
       )}
+
+      {/* <SelectionInsights ... /> removed as per requirements */}
 
       {modalImage && <ImageModal image={modalImage} onClose={() => setModalImage(null)} />}
     </aside>
