@@ -4,7 +4,7 @@ export function HelpBox() {
       <summary>How to use this prototype</summary>
       <div>
         <p>
-          Start with the heatmap: rows are ROIs, columns are models, and color encodes the aggregate JSON score. Use
+          Start with the heatmap: columns are ROIs, rows are models, and color encodes the aggregate JSON score. Use
           search and sort controls to narrow the model set.
         </p>
         <p>

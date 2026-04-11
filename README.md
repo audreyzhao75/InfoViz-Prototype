@@ -60,16 +60,33 @@ This means the heatmap can show more models than the evidence panel can explain.
 
 Install dependencies:
 
+=======
+# Welcome to our Information Visualization prototype. 
+In this repo, we explore a novel visualization to showcase how LLM models correlate in determining image accuracy against regions of interest of the brain (ROIs).
+
+## To clone this repo:
+```bash
+git clone https://github.com/audreyzhao75/InfoViz-Prototype.git
+cd InfoViz-Prototype
+```
+
+## To install the dependecies:
+>>>>>>> c13d2c921981ab8a411a02d2023a3bd8c1d1a73d
 ```bash
 npm install
 ```
 
+<<<<<<< HEAD
 Start the dev server:
 
+=======
+## To run the prototype:
+>>>>>>> c13d2c921981ab8a411a02d2023a3bd8c1d1a73d
 ```bash
 npm run dev
 ```
 
+<<<<<<< HEAD
 Create a production build:
 
 ```bash
@@ -92,3 +109,6 @@ This repo previously tracked generated artifacts and dependency folders. The `.g
 - TypeScript build info files
 
 If you want the Git history to stop tracking those files, remove them from the index in a cleanup commit.
+=======
+And then follow the link in the console to open a localhost (example: http://localhost:5173/)
+>>>>>>> c13d2c921981ab8a411a02d2023a3bd8c1d1a73d
