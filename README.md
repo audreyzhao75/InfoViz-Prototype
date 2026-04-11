@@ -58,8 +58,6 @@ This means the heatmap can show more models than the evidence panel can explain.
 
 ## Local Development
 
-## Local Development
-
 Follow these steps to set up and run the project locally:
 
 1. **Clone the repository:**
