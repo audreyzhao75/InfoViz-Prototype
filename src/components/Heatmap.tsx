@@ -25,7 +25,7 @@ type TooltipState = {
   y: number;
 };
 
-const margin = { top: 34, right: 28, bottom: 62, left: 190 };
+const margin = { top: 120, right: 28, bottom: 62, left: 190 }; // Further increased top margin for more legend space
 const roiColumnWidth = 96;
 const modelRowHeight = 28;
 const sortToggleBoxSize = 34;
@@ -149,20 +149,6 @@ export function Heatmap({
         <span>{cells.length} cells</span>
       </div>
       <div className="heatmap-scroll" style={{ position: 'relative' }} onMouseLeave={() => setTooltip(null)}>
-        {/* Color scale legend at top-right */}
-        <div style={{ position: 'absolute', top: 54, left: 0, zIndex: 2, padding: '18px 0 0 18px' }}>
-          <svg width="160" height="38" style={{ display: 'block' }} aria-label="Color scale legend">
-            <defs>
-              <linearGradient id="heatmap-legend-gradient" x1="0" x2="1" y1="0" y2="0">
-                <stop offset="0%" stopColor={color(adjustedMaxScore)} />
-                <stop offset="100%" stopColor={color(minScore)} />
-              </linearGradient>
-            </defs>
-            <rect x="0" y="8" width="120" height="16" rx="7" fill="url(#heatmap-legend-gradient)" />
-            <text x="0" y="34" fontSize="11" fill="#42554b" fontWeight="700">Highest</text>
-            <text x="120" y="34" fontSize="11" fill="#42554b" fontWeight="700" textAnchor="end">Lowest</text>
-          </svg>
-        </div>
         {cells.length === 0 ? (
           <div className="heatmap-empty-state">
             <h3>No models match the current search</h3>
@@ -171,6 +157,28 @@ export function Heatmap({
         ) : (
           <svg className="heatmap-svg" viewBox={`0 0 ${width} ${height}`} role="img">
             <title>Model by ROI aggregate score heatmap</title>
+            {/* Move the color scale legend to the top, just below the heading */}
+            <g className="heatmap-legend" transform={`translate(${margin.left},${margin.top - 70})`}>
+              {legendSteps.map((value, index) => (
+                <rect key={value} x={index * 4} y={0} width={4} height={10} fill={color(value)} />
+              ))}
+              {legendValues.map((value, index) => (
+                <text key={value} x={index * 94} y={30} textAnchor={index === 2 ? 'end' : 'start'}>
+                  {value.toFixed(2)}
+                </text>
+              ))}
+              <text x={214} y={10} dominantBaseline="middle">
+                Aggregate score
+              </text>
+              {compareMode && (
+                <g className="disabled-cell-legend" transform="translate(328, 0)">
+                  <rect width={16} height={10} rx={3} />
+                  <text x={24} y={10} dominantBaseline="middle">
+                    Not comparable
+                  </text>
+                </g>
+              )}
+            </g>
             <g
               className="heatmap-corner-sort"
               role="button"
