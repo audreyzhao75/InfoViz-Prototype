@@ -8,8 +8,7 @@ export function Header({ imageCount, modelCount, roiCount }: HeaderProps) {
   return (
     <header className="app-header">
       <div>
-        <p className="eyebrow">Cortex model alignment</p>
-        <h1>Interactive information visualization</h1>
+        <h1>Vision-AI Performance Visualization</h1>
         <p className="lede">
           Compare aggregate model alignment scores across cortical regions, then inspect the image-level evidence that
           drives each ROI/model cell.
