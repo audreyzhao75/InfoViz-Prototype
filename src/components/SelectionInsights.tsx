@@ -153,4 +153,4 @@ export function SelectionInsights({
 
   // UI removed as per requirements
   return null;
-      <div className="insight-panel-header">
+}
